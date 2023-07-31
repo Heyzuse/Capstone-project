@@ -1,0 +1,9 @@
+<h2>Your Exercises</h2>
+<ul>
+    {% for exercise in exercises %}
+        <li>
+            <h3>{{ exercise.name }}</h3>
+            <p>{{ exercise.description }}</p>
+        </li>
+    {% endfor %}
+</ul>
