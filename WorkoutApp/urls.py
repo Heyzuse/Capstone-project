@@ -14,16 +14,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-import sys
-sys.path.append('C:\Users\Danny - Laptop\Documents\GitHub\Capstone-project\WorkoutApp\views.py')
 from django.contrib import admin
 from django.urls import path
-from WorkoutApp import UserRegisterView, UserUpdateView, UserDeleteView
-
+from .views import UserRegisterView, UserUpdateView, UserDeleteView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    
+    path('admin/', admin.site.urls),  
     path('register/', UserRegisterView.as_view(), name='register'),
     path('profile/update/', UserUpdateView.as_view(), name='update-profile'),
     path('profile/delete/', UserDeleteView.as_view(), name='delete-profile'),
