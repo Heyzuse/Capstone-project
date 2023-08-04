@@ -1,13 +1,12 @@
 from django.shortcuts import render
-
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-
 from .models import Profile, Exercise, ExerciseType
+from .forms import ProfileForm, ExerciseForm, WorkoutForm
 
 class UserRegisterView(CreateView):
     model = User
@@ -41,25 +40,29 @@ def exercise_detail(request, exercise_id):
 
 def exercise_create(request, profile_id):
     profile = get_object_or_404(Profile, pk=profile_id)
+
     if request.method == 'POST':
-        # Assuming your Exercise model has fields 'name', 'type', and 'description'.
-        new_exercise = Exercise(profile=profile, name=request.POST['name'], type=request.POST['type'], description=request.POST['description'])
-        new_exercise.save()
-        return HttpResponseRedirect(reverse('exercise_list', args=(profile.id,)))
+        form = ExerciseForm(request.POST)
+        if form.is_valid():
+            new_exercise = form.save(commit=False)
+            new_exercise.profile = profile
+            new_exercise.save()
+            return HttpResponseRedirect(reverse('exercise_list', args=(profile.id,)))
     else:
-        return render(request, 'exercise_create.html', {'profile': profile})
+        form = ExerciseForm()
+
+    return render(request, 'exercise_create.html', {'form': form, 'profile': profile})
 
 def exercise_update(request, exercise_id):
     exercise = get_object_or_404(Exercise, pk=exercise_id)
     if request.method == 'POST':
-        # Update the exercise fields based on the form data.
-        exercise.name = request.POST['name']
-        exercise.type = request.POST['type']
-        exercise.description = request.POST['description']
-        exercise.save()
-        return HttpResponseRedirect(reverse('exercise_detail', args=(exercise.id,)))
+        form = ExerciseForm(request.POST, instance=exercise)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('exercise_detail', args=(exercise.id,)))
     else:
-        return render(request, 'exercise_update.html', {'exercise': exercise})
+        form = ExerciseForm(instance=exercise)
+    return render(request, 'exercise_update.html', {'form': form})
 
 def exercise_delete(request, exercise_id):
     exercise = get_object_or_404(Exercise, pk=exercise_id)
