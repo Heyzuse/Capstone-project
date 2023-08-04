@@ -15,10 +15,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 import sys
-sys.path.append('C:\Users\Danny - Laptop\Documents\GitHub\Capstone-project\WorkoutApp\views.py')
+
 from django.contrib import admin
 from django.urls import path
 from WorkoutApp import UserRegisterView, UserUpdateView, UserDeleteView
+from . import views
 
 
 urlpatterns = [

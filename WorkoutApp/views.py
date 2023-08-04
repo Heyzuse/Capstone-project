@@ -66,8 +66,9 @@ def exercise_update(request, exercise_id):
 
 def exercise_delete(request, exercise_id):
     exercise = get_object_or_404(Exercise, pk=exercise_id)
+    profile_id = exercise.profile.id
     if request.method == 'POST':
         exercise.delete()
-        return HttpResponseRedirect(reverse('exercise_list', args=(exercise.profile.id,)))
+        return HttpResponseRedirect(reverse('exercise_list', args=(profile_id,)))
     else:
         return render(request, 'exercise_delete.html', {'exercise': exercise})

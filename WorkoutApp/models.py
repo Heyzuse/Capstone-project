@@ -13,7 +13,7 @@ class Profile(models.Model):
     fitness_goal = models.CharField(max_length=200)
 
 class Workout(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     date = models.DateField()
     duration = models.IntegerField(help_text="Duration in minutes")

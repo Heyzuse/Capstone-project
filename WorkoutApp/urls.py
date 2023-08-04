@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from . import views
 from .views import UserRegisterView, UserUpdateView, UserDeleteView
 
 urlpatterns = [
@@ -23,4 +24,10 @@ urlpatterns = [
     path('register/', UserRegisterView.as_view(), name='register'),
     path('profile/update/', UserUpdateView.as_view(), name='update-profile'),
     path('profile/delete/', UserDeleteView.as_view(), name='delete-profile'),
+    path('', views.home, name='home'),
+    path('profile/<int:profile_id>/exercises/', views.exercise_list, name='exercise_list'),
+    path('exercise/<int:exercise_id>/', views.exercise_detail, name='exercise_detail'),
+    path('profile/<int:profile_id>/exercise/new/', views.exercise_create, name='exercise_create'),
+    path('exercise/<int:exercise_id>/edit/', views.exercise_update, name='exercise_update'),
+    path('exercise/<int:exercise_id>/delete/', views.exercise_delete, name='exercise_delete'),
 ]

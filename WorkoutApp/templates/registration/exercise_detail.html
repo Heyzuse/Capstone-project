@@ -1,0 +1,11 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+    <a href="{% url 'exercise_list' exercise.profile.id %}">Back to Exercise List</a>
+
+    <h2>{{ exercise.name }}</h2>
+    <p>{{ exercise.description }}</p>
+    <p>{{ exercise.date }}</p>
+    <a href="{% url 'edit_exercise' exercise.id %}">Edit</a>
+    <a href="{% url 'delete_exercise' exercise.id %}">Delete</a>
+{% endblock %}
