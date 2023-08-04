@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,7 +12,17 @@
 <body>
     {% include "navbar.html" %}
     <div class="container">
-        {% block content %}{% endblock %}
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+            <div{% if message.tags %} class="alert alert-{{ message.tags }}"{% endif %}>
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% block content %}
+      {% endblock %}
     </div>
 
     <footer>
@@ -20,4 +32,3 @@
   <!-- JavaScript files that should load at the end of the body here -->
 </body>
 </html>
-

@@ -18,12 +18,13 @@ Including another URLconf
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
-from .views import UserRegisterView, UserUpdateView, UserDeleteView, register
+from .views import UserRegisterView, UserUpdateView, UserDeleteView
 
 urlpatterns = [
-    path('register/', views.register, name='register'),
+    path('register/', views.UserRegisterView.as_view(), name='register'),
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'),
+    path('profile/<int:pk>/', views.UserDetailView.as_view(), name='profile'),
     path('profile/update/', UserUpdateView.as_view(), name='update-profile'),
     path('profile/delete/', UserDeleteView.as_view(), name='delete-profile'),
     path('', views.home, name='home'),

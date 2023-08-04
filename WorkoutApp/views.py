@@ -1,8 +1,9 @@
 from django.shortcuts import render
+from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from django.views.generic import CreateView, UpdateView, DeleteView
+from django.views.generic import CreateView, UpdateView, DeleteView, DetailView
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -15,6 +16,18 @@ class UserRegisterView(CreateView):
     form_class = UserCreationForm
     template_name = 'registration/register.html'
     success_url = '/'
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Form submission successful')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Form submission unsuccessful')
+        return super().form_invalid(form)
+    
+class UserDetailView(DetailView):
+    model = User
+    template_name = 'registration/profile.html'
 
 class UserUpdateView(UpdateView):
     model = User
@@ -31,19 +44,16 @@ def home(request):
     profiles = Profile.objects.all()
     return render(request, 'home.html', {'profiles': profiles})
 
-def register(request):
-    if request.method == "POST":
-        form = UserCreationForm(request.POST)
+def profile(request, profile_id):
+    profile = get_object_or_404(Profile, pk=profile_id)
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, instance=profile)
         if form.is_valid():
             form.save()
-            username = form.cleaned_data.get('username')
-            raw_password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=raw_password)
-            login(request, user)
-            return redirect('home')
+            return redirect('profile', profile_id=profile.id)
     else:
-        form = UserCreationForm()
-    return render(request, 'register.html', {'form': form})
+        form = ProfileForm(instance=profile)
+    return render(request, 'profile.html', {'form': form, 'profile': profile})
 
 def login_view(request):
     if request.method == "POST":
