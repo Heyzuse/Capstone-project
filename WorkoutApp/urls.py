@@ -16,11 +16,14 @@ Including another URLconf
 """
 
 from django.urls import path
+from django.contrib.auth import views as auth_views
 from . import views
-from .views import UserRegisterView, UserUpdateView, UserDeleteView
+from .views import UserRegisterView, UserUpdateView, UserDeleteView, register
 
-urlpatterns = [ 
-    path('register/', UserRegisterView.as_view(), name='register'),
+urlpatterns = [
+    path('register/', views.register, name='register'),
+    path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'),
     path('profile/update/', UserUpdateView.as_view(), name='update-profile'),
     path('profile/delete/', UserDeleteView.as_view(), name='delete-profile'),
     path('', views.home, name='home'),
@@ -30,3 +33,5 @@ urlpatterns = [
     path('exercise/<int:exercise_id>/edit/', views.exercise_update, name='exercise_update'),
     path('exercise/<int:exercise_id>/delete/', views.exercise_delete, name='exercise_delete'),
 ]
+
+
