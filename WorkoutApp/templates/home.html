@@ -1,5 +1,5 @@
 <h2>Welcome, {{ user.username }}</h2>
 <p>This is your dashboard.</p>
 <a href="{% url 'logout' %}">Logout</a>
-<a href="{% url 'profile' %}">Update Profile</a>
-<a href="{% url 'delete_profile' %}">Delete Profile</a>
+<a href="{% url 'profile' user.id %}">Update Profile</a>
+<a href="{% url 'delete-profile' user.id %}">Delete Profile</a>

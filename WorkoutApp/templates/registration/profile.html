@@ -5,4 +5,7 @@
     <button type="submit">Update</button>
 </form>
 
-<a href="{% url 'exercise_list' profile.id %}">View Exercises</a>
+<p>Profile ID: {{ profile.id }}</p>
+<a href="{% url 'exercise_list' profile_id=profile.id %}">View Exercises</a>
+
+

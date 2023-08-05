@@ -6,7 +6,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.views.generic import CreateView, UpdateView, DeleteView, DetailView
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from .models import Profile, Exercise, ExerciseType
 from .forms import ProfileForm, ExerciseForm, WorkoutForm
 
@@ -15,15 +15,38 @@ class UserRegisterView(CreateView):
     model = User
     form_class = UserCreationForm
     template_name = 'registration/register.html'
-    success_url = '/'
 
     def form_valid(self, form):
-        messages.success(self.request, 'Form submission successful')
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        username = form.cleaned_data.get('username')
+        raw_password = form.cleaned_data.get('password1')
+        user = authenticate(self.request, username=username, password=raw_password)
+        if user is not None:
+            login(self.request, user)
+            Profile.objects.create(user=user)  # Create an associated Profile
+            messages.success(self.request, 'Registration successful')
+        else:
+            messages.error(self.request, 'Registration unsuccessful. Please try again.')
+        return response
 
     def form_invalid(self, form):
         messages.error(self.request, 'Form submission unsuccessful')
+        print(form.errors)
         return super().form_invalid(form)
+
+    def get_success_url(self):
+        return reverse('profile_update', kwargs={'pk': self.object.profile.pk})
+
+
+
+class ProfileUpdateView(UpdateView):
+    model = Profile
+    fields = ['age', 'gender', 'height', 'weight', 'birthdate', 'fitness_goal']  # adjust the fields as needed
+    template_name = 'profile_update.html'
+    success_url = reverse_lazy('home')  # adjust to your needs
+
+    def get_object(self, queryset=None): 
+        return self.request.user.profile
     
 class UserDetailView(DetailView):
     model = User
@@ -32,7 +55,7 @@ class UserDetailView(DetailView):
 class UserUpdateView(UpdateView):
     model = User
     form_class = UserCreationForm
-    template_name = 'registration/profile.html'
+    template_name = 'registration/profile_update.html'
     success_url = '/profile/'
 
 class UserDeleteView(DeleteView):
@@ -42,14 +65,18 @@ class UserDeleteView(DeleteView):
 
 def home(request):
     profiles = Profile.objects.all()
-    return render(request, 'home.html', {'profiles': profiles})
+    if request.user.is_authenticated:
+        return render(request, 'home.html', {'profiles': profiles})
+    else:
+        return redirect('login')
 
 def profile(request, profile_id):
     profile = get_object_or_404(Profile, pk=profile_id)
+    print(profile.id)
     if request.method == 'POST':
         form = ProfileForm(request.POST, instance=profile)
         if form.is_valid():
-            form.save()
+            profile = form.save()
             return redirect('profile', profile_id=profile.id)
     else:
         form = ProfileForm(instance=profile)
@@ -64,9 +91,9 @@ def login_view(request):
             login(request, user)
             return redirect('home')
         else:
-            form = AuthenticationForm()
+            form = ProfileForm()
     else:
-        form = AuthenticationForm()
+        form = ProfileForm()
     return render(request, 'login.html', {'form': form})
 
 def exercise_list(request, profile_id):
