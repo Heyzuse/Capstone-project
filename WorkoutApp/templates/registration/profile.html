@@ -1,11 +1,9 @@
-<h2>Update Profile</h2>
+<h2>Your Profile</h2>
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Update</button>
 </form>
 
 <p>Profile ID: {{ profile.id }}</p>
+<a href="{% url 'profile_update' %}">Update Profile</a>
 <a href="{% url 'exercise_list' profile_id=profile.id %}">View Exercises</a>
-
-

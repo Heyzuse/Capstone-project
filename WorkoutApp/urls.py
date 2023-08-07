@@ -25,7 +25,7 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'),
     path('profile/<int:pk>/', views.UserDetailView.as_view(), name='profile'),
-    path('profile/<int:pk>/update/', views.ProfileUpdateView.as_view(), name='profile_update'),
+    path('profile/update/', views.ProfileUpdateView.as_view(), name='profile_update'),
     path('profile/delete/<int:pk>/', UserDeleteView.as_view(), name='delete-profile'),
     path('', views.home, name='home'),
     path('profile/<int:profile_id>/exercises/', views.exercise_list, name='exercise_list'),

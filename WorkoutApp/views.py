@@ -29,7 +29,6 @@ class UserRegisterView(CreateView):
             messages.error(self.request, 'Registration unsuccessful. Please try again.')
         return response
 
-
     def form_invalid(self, form):
         messages.error(self.request, 'Form submission unsuccessful')
         print(form.errors)
@@ -38,13 +37,11 @@ class UserRegisterView(CreateView):
     def get_success_url(self):
         return reverse('profile_update', kwargs={'pk': self.object.profile.pk})
 
-
-
 class ProfileUpdateView(UpdateView):
     model = Profile
-    fields = ['age', 'gender', 'height', 'weight', 'birthdate', 'fitness_goal']  # adjust the fields as needed
+    form_class = ProfileForm
     template_name = 'profile_update.html'
-    success_url = reverse_lazy('home')  # adjust to your needs
+    success_url = reverse_lazy('home')
 
     def get_object(self, queryset=None): 
         return self.request.user.profile
@@ -52,6 +49,11 @@ class ProfileUpdateView(UpdateView):
 class UserDetailView(DetailView):
     model = User
     template_name = 'registration/profile.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['profile'] = Profile.objects.get(user=self.object)  # get the Profile of the User
+        return context
 
 class UserUpdateView(UpdateView):
     model = User
