@@ -28,6 +28,16 @@ urlpatterns = [
     path('profile/update/', views.ProfileUpdateView.as_view(), name='profile_update'),
     path('profile/delete/<int:pk>/', UserDeleteView.as_view(), name='delete-profile'),
     path('', views.home, name='home'),
+
+    #Workouts
+    path('workout/new/', views.WorkoutCreateView.as_view(), name='workout_create'),
+    path('workout/<int:pk>/', views.WorkoutDetailView.as_view(), name='workout_detail'),
+    path('workout/<int:pk>/update/', views.WorkoutUpdateView.as_view(), name='workout_update'),
+    path('workout/<int:pk>/delete/', views.WorkoutDeleteView.as_view(), name='workout_delete'),
+    path('workout/<int:workout_id>/add_exercises/', views.add_exercises_to_workout, name='add_exercises_to_workout'),
+    path('profile/<int:profile_id>/workouts/', views.WorkoutListView.as_view(), name='workout_list'),
+
+    #Individual Exercises
     path('profile/<int:profile_id>/exercises/', views.exercise_list, name='exercise_list'),
     path('exercise/<int:exercise_id>/', views.exercise_detail, name='exercise_detail'),
     path('profile/<int:profile_id>/exercise/new/', views.exercise_create, name='exercise_create'),

@@ -5,12 +5,12 @@ body {
 
 header, footer {
     background-color: #333;
-    color: white;
+    color: rgb(218, 217, 217);
     padding: 10px;
 }
 
 nav a {
-    color: white;
+    color: rgb(19, 6, 194);
     text-decoration: none;
     margin: 0 10px;
 }

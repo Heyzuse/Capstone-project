@@ -1,9 +1,13 @@
-<h2>Your Profile</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-</form>
+{% extends 'base_generic.html' %}
 
-<p>Profile ID: {{ profile.id }}</p>
-<a href="{% url 'profile_update' %}">Update Profile</a>
-<a href="{% url 'exercise_list' profile_id=profile.id %}">View Exercises</a>
+{% block content %}
+    <h2>Your Profile</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+    </form>
+
+    <p>Profile ID: {{ profile.id }}</p>
+    <a href="{% url 'profile_update' %}">Update Profile</a>
+    <a href="{% url 'workout_list' profile.id %}">List of Workouts</a>
+{% endblock %}

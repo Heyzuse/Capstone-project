@@ -1,4 +1,6 @@
 {% extends 'base_generic.html' %}
+
+{% block content %}
 <h2>Your Exercises</h2>
 <ul>
     {% for exercise in exercises %}
@@ -8,4 +10,4 @@
         </li>
     {% endfor %}
 </ul>
-{% block content %}{% endblock %}
+{% endblock %}

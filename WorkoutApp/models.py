@@ -12,21 +12,28 @@ class Profile(models.Model):
     birthdate = models.DateField(null=True, blank=True)
     fitness_goal = models.CharField(max_length=200)
 
+    def __str__(self):
+        return self.user.username
+
 class ExerciseType(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
 
 class Exercise(models.Model):
-    type = models.ForeignKey(ExerciseType, on_delete=models.SET_NULL, null=True)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=100)
+    type = models.CharField(max_length=100)
     description = models.TextField()
     repetitions = models.IntegerField()
     sets = models.IntegerField()
 
+    def __str__(self):
+        return self.name
+
 class Workout(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
-    date = models.DateField()
+    date = models.DateField(auto_now_add=True)
     exercises = models.ManyToManyField(Exercise)
     duration = models.IntegerField(help_text="Duration in minutes")
 

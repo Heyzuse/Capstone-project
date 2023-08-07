@@ -3,11 +3,11 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from django.views.generic import CreateView, UpdateView, DeleteView, DetailView
+from django.views.generic import CreateView, UpdateView, DeleteView, DetailView, ListView
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
-from .models import Profile, Exercise, ExerciseType
+from .models import Profile, Exercise, ExerciseType, Workout
 from .forms import ProfileForm, ExerciseForm, WorkoutForm
 
 
@@ -66,6 +66,41 @@ class UserDeleteView(DeleteView):
     success_url = '/'
     template_name = 'registration/confirm_delete.html'
 
+class WorkoutCreateView(CreateView):
+    model = Workout
+    form_class = WorkoutForm
+    template_name = 'workout_create.html'
+    success_url = reverse_lazy('workout_list')
+
+    def form_valid(self, form):
+        form.instance.profile = Profile.objects.get(user=self.request.user)
+        return super().form_valid(form)
+
+class WorkoutDetailView(DetailView):
+    model = Workout
+    template_name = 'workout_detail.html'
+
+
+class WorkoutUpdateView(UpdateView):
+    model = Workout
+    form_class = WorkoutForm
+    template_name = 'workout_update.html'
+    success_url = reverse_lazy('home')
+
+
+class WorkoutDeleteView(DeleteView):
+    model = Workout
+    template_name = 'workout_confirm_delete.html'
+    success_url = reverse_lazy('home')
+
+class WorkoutListView(ListView):
+    model = Workout
+    template_name = 'workout_list.html'
+
+    def get_queryset(self):
+        return Workout.objects.filter(profile=self.request.user.profile)
+
+
 def home(request):
     profiles = Profile.objects.all()
     if request.user.is_authenticated:
@@ -99,6 +134,20 @@ def login_view(request):
         form = ProfileForm()
     return render(request, 'login.html', {'form': form})
 
+def add_exercises_to_workout(request, workout_id):
+    workout = get_object_or_404(Workout, pk=workout_id)
+    if request.method == 'POST':
+        form = ExerciseSelectionForm(request.POST)
+        if form.is_valid():
+            exercises = form.cleaned_data['exercises']
+            workout.exercises.add(*exercises)
+            return HttpResponseRedirect(reverse('workout_detail', args=(workout.id,)))
+    else:
+        form = ExerciseSelectionForm()
+    return render(request, 'add_exercises_to_workout.html', {'form': form, 'workout': workout})
+
+
+# Maybe these
 def exercise_list(request, profile_id):
     profile = get_object_or_404(Profile, pk=profile_id)
     exercises = Exercise.objects.filter(profile=profile)

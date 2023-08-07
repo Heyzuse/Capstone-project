@@ -1,0 +1,7 @@
+{% extends 'base_generic.html' %}
+
+<h2>Are you sure you want to delete this workout?</h2>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Yes, Delete</button>
+</form>
