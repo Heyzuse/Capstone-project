@@ -6,7 +6,12 @@
     {% for workout in object_list %}
       <li>
         <a href="{% url 'workout_detail' workout.id %}">{{ workout.name }}</a>
+        <a href="{% url 'edit_workout' pk=workout.pk %}">Edit</a>
       </li>
+    {% empty %}
+      <li>No workouts available.</li>
     {% endfor %}
   </ul>
+  <a href="{% url 'workout_create' %}">Create Workout</a>
 {% endblock %}
+

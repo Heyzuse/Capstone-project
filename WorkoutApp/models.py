@@ -36,6 +36,7 @@ class Workout(models.Model):
     date = models.DateField(auto_now_add=True)
     exercises = models.ManyToManyField(Exercise)
     duration = models.IntegerField(help_text="Duration in minutes")
+    description = models.TextField(blank=True, null=True)
 
 @receiver(post_save, sender=User)
 def create_profile(sender, instance, created, **kwargs):

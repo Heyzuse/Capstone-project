@@ -1,0 +1,12 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h2>Delete Exercise</h2>
+  <p>Are you sure you want to delete the exercise "{{ object.name }}"?</p>
+  
+  <form method="post">
+    {% csrf_token %}
+    <input type="submit" value="Yes, delete">
+    <a href="{% url 'exercise_list' object.profile.id %}">Cancel</a>
+  </form>
+{% endblock %}

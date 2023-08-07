@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.views.generic import CreateView, UpdateView, DeleteView, DetailView, ListView
+from django.views.generic.edit import DeleteView
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
@@ -100,6 +101,27 @@ class WorkoutListView(ListView):
     def get_queryset(self):
         return Workout.objects.filter(profile=self.request.user.profile)
 
+class EditWorkoutView(UpdateView):
+    model = Workout
+    template_name = 'edit_workout.html'
+    form_class = WorkoutForm
+
+    def get_form_kwargs(self):
+        kwargs = super(EditWorkoutView, self).get_form_kwargs()
+        kwargs['profile'] = self.object.profile
+        return kwargs
+    
+    def get_success_url(self):
+        profile_id = self.object.profile.id
+        return reverse('workout_list', args=[profile_id])
+    
+class DeleteExerciseView(DeleteView):
+    model = Exercise
+    template_name = 'exercise_confirm_delete.html'
+    
+    def get_success_url(self):
+        profile_id = self.object.profile.id
+        return reverse('exercise_list', args=[profile_id])
 
 def home(request):
     profiles = Profile.objects.all()
@@ -137,13 +159,13 @@ def login_view(request):
 def add_exercises_to_workout(request, workout_id):
     workout = get_object_or_404(Workout, pk=workout_id)
     if request.method == 'POST':
-        form = ExerciseSelectionForm(request.POST)
+        form = exercise_list(request.POST)
         if form.is_valid():
             exercises = form.cleaned_data['exercises']
             workout.exercises.add(*exercises)
             return HttpResponseRedirect(reverse('workout_detail', args=(workout.id,)))
     else:
-        form = ExerciseSelectionForm()
+        form = exercise_list()
     return render(request, 'add_exercises_to_workout.html', {'form': form, 'workout': workout})
 
 
@@ -182,12 +204,3 @@ def exercise_update(request, exercise_id):
     else:
         form = ExerciseForm(instance=exercise)
     return render(request, 'exercise_update.html', {'form': form})
-
-def exercise_delete(request, exercise_id):
-    exercise = get_object_or_404(Exercise, pk=exercise_id)
-    profile_id = exercise.profile.id
-    if request.method == 'POST':
-        exercise.delete()
-        return HttpResponseRedirect(reverse('exercise_list', args=(profile_id,)))
-    else:
-        return render(request, 'exercise_delete.html', {'exercise': exercise})

@@ -7,7 +7,11 @@
         <li>
             <h3>{{ exercise.name }}</h3>
             <p>{{ exercise.description }}</p>
+            <a href="{% url 'delete_exercise' exercise.pk %}">Delete</a>
         </li>
+    {% empty %}
+        <li>No exercises added.</li>
     {% endfor %}
 </ul>
+<a href="{% url 'exercise_create' user.profile.id %}">Create Exercise</a>
 {% endblock %}

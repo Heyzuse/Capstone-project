@@ -29,7 +29,13 @@ class WorkoutForm(forms.ModelForm):
     class Meta:
         model = Workout
         fields = ['name', 'duration', 'exercises', 'profile']
-    
+
+    def __init__(self, *args, **kwargs):
+        profile = kwargs.pop('profile', None)
+        super(WorkoutForm, self).__init__(*args, **kwargs)
+        if profile:
+            self.fields['exercises'].queryset = Exercise.objects.filter(profile=profile)
+            
     def clean_duration(self):
         duration = self.cleaned_data.get('duration')
         if not duration:

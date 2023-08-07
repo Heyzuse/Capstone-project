@@ -18,7 +18,7 @@ Including another URLconf
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
-from .views import UserRegisterView, UserUpdateView, UserDeleteView
+from .views import UserRegisterView, UserUpdateView, UserDeleteView, DeleteExerciseView
 
 urlpatterns = [
     path('register/', views.UserRegisterView.as_view(), name='register'),
@@ -36,13 +36,14 @@ urlpatterns = [
     path('workout/<int:pk>/delete/', views.WorkoutDeleteView.as_view(), name='workout_delete'),
     path('workout/<int:workout_id>/add_exercises/', views.add_exercises_to_workout, name='add_exercises_to_workout'),
     path('profile/<int:profile_id>/workouts/', views.WorkoutListView.as_view(), name='workout_list'),
+    path('workout/edit/<int:pk>/', views.EditWorkoutView.as_view(), name='edit_workout'),
 
     #Individual Exercises
     path('profile/<int:profile_id>/exercises/', views.exercise_list, name='exercise_list'),
     path('exercise/<int:exercise_id>/', views.exercise_detail, name='exercise_detail'),
     path('profile/<int:profile_id>/exercise/new/', views.exercise_create, name='exercise_create'),
     path('exercise/<int:exercise_id>/edit/', views.exercise_update, name='exercise_update'),
-    path('exercise/<int:exercise_id>/delete/', views.exercise_delete, name='exercise_delete'),
+    path('exercise/delete/<int:pk>/', DeleteExerciseView.as_view(), name='delete_exercise'),
 ]
 
 
