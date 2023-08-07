@@ -23,11 +23,12 @@ class UserRegisterView(CreateView):
         user = authenticate(self.request, username=username, password=raw_password)
         if user is not None:
             login(self.request, user)
-            Profile.objects.create(user=user)  # Create an associated Profile
+            Profile.objects.get_or_create(user=user)  # Get or Create an associated Profile
             messages.success(self.request, 'Registration successful')
         else:
             messages.error(self.request, 'Registration unsuccessful. Please try again.')
         return response
+
 
     def form_invalid(self, form):
         messages.error(self.request, 'Form submission unsuccessful')
