@@ -18,7 +18,7 @@ Including another URLconf
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
-from .views import UserRegisterView, UserUpdateView, UserDeleteView, DeleteExerciseView
+from .views import UserRegisterView, UserUpdateView, UserDeleteView, DeleteExerciseView, PublicWorkoutListView
 
 urlpatterns = [
     path('register/', views.UserRegisterView.as_view(), name='register'),
@@ -36,6 +36,7 @@ urlpatterns = [
     path('workout/<int:pk>/delete/', views.WorkoutDeleteView.as_view(), name='workout_delete'),
     path('workout/<int:workout_id>/add_exercises/', views.add_exercises_to_workout, name='add_exercises_to_workout'),
     path('profile/<int:profile_id>/workouts/', views.WorkoutListView.as_view(), name='workout_list'),
+    path('browse_workouts/', PublicWorkoutListView.as_view(), name='browse_workouts'),
     path('workout/edit/<int:pk>/', views.EditWorkoutView.as_view(), name='edit_workout'),
 
     #Individual Exercises

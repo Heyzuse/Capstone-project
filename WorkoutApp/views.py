@@ -71,11 +71,13 @@ class WorkoutCreateView(CreateView):
     model = Workout
     form_class = WorkoutForm
     template_name = 'workout_create.html'
-    success_url = reverse_lazy('workout_list')
 
     def form_valid(self, form):
         form.instance.profile = Profile.objects.get(user=self.request.user)
         return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('workout_list', args=[self.request.user.profile.id])
 
 class WorkoutDetailView(DetailView):
     model = Workout
@@ -93,6 +95,9 @@ class WorkoutDeleteView(DeleteView):
     model = Workout
     template_name = 'workout_confirm_delete.html'
     success_url = reverse_lazy('home')
+    
+    def get_success_url(self):
+        return reverse('workout_list', args=[self.request.user.profile.id])
 
 class WorkoutListView(ListView):
     model = Workout
@@ -114,6 +119,7 @@ class EditWorkoutView(UpdateView):
     def get_success_url(self):
         profile_id = self.object.profile.id
         return reverse('workout_list', args=[profile_id])
+
     
 class DeleteExerciseView(DeleteView):
     model = Exercise
@@ -122,6 +128,13 @@ class DeleteExerciseView(DeleteView):
     def get_success_url(self):
         profile_id = self.object.profile.id
         return reverse('exercise_list', args=[profile_id])
+
+class PublicWorkoutListView(ListView):
+    model = Workout
+    template_name = 'public_workout_list.html'
+
+    def get_queryset(self):
+        return Workout.objects.filter(public=True)
 
 def home(request):
     profiles = Profile.objects.all()

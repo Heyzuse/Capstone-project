@@ -1,0 +1,14 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+  <h1>Browse Workouts</h1>
+  <ul>
+    {% for workout in object_list %}
+      <li>
+        <a href="{% url 'workout_detail' workout.id %}">{{ workout.name }}</a>
+      </li>
+    {% empty %}
+      <li>No public workouts available.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
