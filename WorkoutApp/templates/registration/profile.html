@@ -8,7 +8,7 @@
     </form>
 
     <p>Profile ID: {{ profile.id }}</p>
-    <a href="{% url 'profile_update' %}">Update Profile</a>
+    <a href=" {% url 'profile_update' profile.id %} ">Update Profile</a>
     <a href="{% url 'workout_list' profile.id %}">List of Workouts</a>
     <a href="{% url 'exercise_list' object.profile.id %}">List of Current Exercises</a>
 {% endblock %}
