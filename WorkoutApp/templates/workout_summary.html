@@ -1,0 +1,16 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h2>Workout Summary</h2>
+    <p><strong>Name:</strong> {{ workout.name }}</p>
+    <p><strong>Date:</strong> {{ workout.date }}</p>
+    <p><strong>Duration:</strong> {{ workout.duration }} minutes</p>
+    <p><strong>Description:</strong> {{ workout.description }}</p>
+    <p><strong>Exercises:</strong></p>
+    <ul>
+        {% for exercise in workout.exercises.all %}
+            <li>{{ exercise.name }} (Reps: {{ exercise.reps }}, Sets: {{ exercise.sets }})</li>
+        {% endfor %}
+    </ul>
+    <p><strong>Completed:</strong> {{ workout.completed }}</p>
+{% endblock %}

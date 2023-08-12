@@ -1,10 +1,21 @@
 from django import forms
-from .models import Profile, Exercise, ExerciseType, Workout
+from .models import Profile, Exercise, ExerciseType, Workout, ExerciseProgress
 
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['age', 'gender', 'height', 'weight', 'birthdate', 'fitness_goal']
+
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['first_name', 'last_name', 'age', 'email', 'gender', 'height', 'weight', 'birthdate', 'fitness_goal']
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if Profile.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError('Email address must be unique.')
+        return email
 
 class ExerciseForm(forms.ModelForm):
     TYPE_CHOICES = [
@@ -18,7 +29,12 @@ class ExerciseForm(forms.ModelForm):
 
     class Meta:
         model = Exercise
-        fields = ['name', 'type', 'description', 'repetitions', 'sets']
+        fields = ['name', 'type', 'description']
+
+class ExerciseProgressForm(forms.ModelForm):
+    class Meta:
+        model = ExerciseProgress
+        fields = ['exercise', 'repetitions', 'sets', 'weight']  
 
 class WorkoutForm(forms.ModelForm):
     exercises = forms.ModelMultipleChoiceField(
@@ -44,4 +60,3 @@ class WorkoutForm(forms.ModelForm):
 
 class ExerciseSelectionForm(forms.Form):
     exercises = forms.ModelMultipleChoiceField(queryset=Exercise.objects.all())
-
