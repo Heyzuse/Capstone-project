@@ -1,14 +1,12 @@
-from django.shortcuts import render
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.views.generic import CreateView, UpdateView, DeleteView, DetailView, ListView
-from django.views.generic.edit import DeleteView
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
-from .models import Profile, Exercise, ExerciseType, Workout, ExerciseProgress
+from .models import Profile, Exercise, ExerciseType, Workout, ExerciseProgress, ProfileHistory
 from .forms import ProfileForm, ExerciseForm, WorkoutForm, ExerciseProgressForm
 
 class UserRegisterView(CreateView):
@@ -35,16 +33,18 @@ class UserRegisterView(CreateView):
 
     def get_success_url(self):
         return reverse('profile_update', kwargs={'pk': self.object.profile.pk})
-
+    
 class ProfileUpdateView(UpdateView):
     model = Profile
     form_class = ProfileForm
     template_name = 'profile_update.html'
     success_url = reverse_lazy('home')
 
-    def get_object(self, queryset=None): 
-        return self.request.user.profile
-    
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        ProfileHistory.objects.create(profile=self.object, height=self.object.height, weight=self.object.weight)
+        return response
+
 class UserDetailView(DetailView):
     model = User
     template_name = 'registration/profile.html'
@@ -170,13 +170,17 @@ def login_view(request):
 def add_exercises_to_workout(request, workout_id):
     workout = get_object_or_404(Workout, pk=workout_id)
     if request.method == 'POST':
-        form = exercise_list(request.POST)
+        form = ExerciseForm(request.POST)
         if form.is_valid():
             exercises = form.cleaned_data['exercises']
-            workout.exercises.add(*exercises)
+            exercise_progress_list = []
+            for exercise in exercises:
+                progress = ExerciseProgress.objects.create(exercise=exercise, profile=request.user.profile, repetitions=0, sets=0)
+                exercise_progress_list.append(progress)
+            workout.exercises.add(*exercise_progress_list)
             return HttpResponseRedirect(reverse('workout_detail', args=(workout.id,)))
     else:
-        form = exercise_list()
+        form = ExerciseForm()
     return render(request, 'add_exercises_to_workout.html', {'form': form, 'workout': workout})
 
 def exercise_list(request, profile_id):
@@ -255,7 +259,7 @@ def workout_summary(request, pk):
 
     if request.user.profile != workout.profile:
         messages.error(request, "You don't have permission to view this workout.")
-        return redirect('some_view_name')  # Redirect to a fallback view or page
+        return redirect('home')  # Redirect to a fallback view or page
 
     context = {
         'workout': workout

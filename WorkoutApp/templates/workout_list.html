@@ -3,10 +3,10 @@
 {% block content %}
   <h1>Your Workouts</h1>
   <ul>
-    {% for workout in object_list %}
+    {% for workout in workout_list %}
       <li>
-        <a href="{% url 'workout_detail' workout.id %}">{{ workout.name }}</a>
-        <a href="{% url 'edit_workout' pk=workout.pk %}">Edit</a>
+        <a href="{% url 'workout_detail' workout.id %}">{{ workout.name }}</a> | 
+        <a href="{% url 'edit_workout' pk=workout.pk %}">Edit</a> | 
         <a href="{% url 'workout_delete' pk=workout.pk %}">Delete</a>
       </li>
     {% empty %}
@@ -15,4 +15,3 @@
   </ul>
   <a href="{% url 'workout_create' %}">Create Workout</a>
 {% endblock %}
-

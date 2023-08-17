@@ -1,14 +1,26 @@
 {% extends 'base_generic.html' %}
 
 {% block content %}
-    <h2>Your Profile</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-    </form>
+<h2>Your Profile</h2>
 
-    <p>Profile ID: {{ profile.id }}</p>
-    <a href=" {% url 'profile_update' profile.id %} ">Update Profile</a>
-    <a href="{% url 'workout_list' profile.id %}">List of Workouts</a>
-    <a href="{% url 'exercise_list' object.profile.id %}">List of Current Exercises</a>
+{% if profile %}
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Save Changes">
+</form>
+
+<p>Profile ID: {{ profile.id }}</p>
+
+<ul class="navigation-links">
+    <li><a href="{% url 'profile_update' profile.id %}">Update Profile</a></li>
+    <li><a href="{% url 'workout_list' profile.id %}">List of Workouts</a></li>
+    <li><a href="{% url 'exercise_list' profile.id %}">List of Current Exercises</a></li>
+    <li><a href="{% url 'delete-profile' user.id %}">Delete Profile</a></li>
+</ul>
+
+{% else %}
+<p>You do not have a profile. Consider creating one!</p>
+{% endif %}
+
 {% endblock %}

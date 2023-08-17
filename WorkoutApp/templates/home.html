@@ -4,9 +4,15 @@
 <h2>Welcome, {{ user.username }}</h2>
 <p>This is your dashboard.</p>
 
-<a href="{% url 'profile' user.id %}">Profile</a>
-<a href="{% url 'exercise_create' user.profile.id %}">Create Exercise</a>
-<a href="{% url 'workout_create' %}">Create Workout</a>
-<a href="{% url 'logout' %}">Logout</a>
-<a href="{% url 'delete-profile' user.id %}">Delete Profile</a>
+<ul class="navigation-links">
+    <li><a href="{% url 'profile' user.id %}">Profile</a></li>
+    
+    {% if user.profile %}
+    <li><a href="{% url 'exercise_create' user.profile.id %}">Create Exercise</a></li>
+    {% endif %}
+    
+    <li><a href="{% url 'workout_create' %}">Create Workout</a></li>
+    <li><a href="{% url 'logout' %}">Logout</a></li>
+</ul>
+
 {% endblock %}

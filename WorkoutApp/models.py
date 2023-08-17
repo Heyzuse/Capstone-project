@@ -35,28 +35,28 @@ class Exercise(models.Model):
     name = models.CharField(max_length=100)
     type = models.ForeignKey(ExerciseType, on_delete=models.CASCADE)
     description = models.TextField()
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    
+
     def __str__(self):
         return self.name
-    
-class ExerciseProgress(models.Model):
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
-    date = models.DateField(auto_now_add=True)
-    repetitions = models.IntegerField()
-    sets = models.IntegerField()
-    weight = models.DecimalField(null=True, max_digits=5, decimal_places=2, help_text="Weight in kilograms or pounds.") 
 
 class Workout(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     date = models.DateField(auto_now_add=True)
-    exercises = models.ManyToManyField(ExerciseProgress)
+    exercises = models.ManyToManyField(Exercise)
     duration = models.IntegerField(help_text="Duration in minutes")
     description = models.TextField(blank=True, null=True)
     public = models.BooleanField(default=False, verbose_name='Publicly Accessible')
     completed = models.BooleanField(default=False)
+
+class ExerciseProgress(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    workout = models.ForeignKey(Workout, on_delete=models.CASCADE)
+    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
+    date = models.DateField(auto_now_add=True)
+    repetitions = models.IntegerField(default=0)
+    sets = models.IntegerField(default=0)
+    weight = models.DecimalField(null=True, max_digits=5, decimal_places=2, help_text="Weight in kilograms or pounds.") 
 
 @receiver(post_save, sender=User)
 def create_profile(sender, instance, created, **kwargs):

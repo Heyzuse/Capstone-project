@@ -33,16 +33,12 @@ class ProfileForm(forms.ModelForm):
         height_str = self.cleaned_data.get('height')
         
         try:
-            if '"' in height_str:
-                feet, inches = height_str.split("'")
-                inches = inches.strip().replace('"', '')
-            else:
-                feet, inches = height_str.split("'")
-            
+            feet, inches = height_str.split("'")
+            inches = inches.strip().replace('"', '')
+        
             total_inches = int(feet) * 12 + int(inches)
         except ValueError:
             raise forms.ValidationError('Invalid height format. Please use format like 5\'4" or 5\'4.')
-
         return total_inches
 
 class ExerciseForm(forms.ModelForm):
@@ -55,9 +51,13 @@ class ExerciseForm(forms.ModelForm):
         self.fields['type'].queryset = ExerciseType.objects.filter(name__in=['Upper Body', 'Core', 'Lower Body', 'Full Body'])
 
 class ExerciseProgressForm(forms.ModelForm):
+    repetitions = forms.IntegerField(initial=0)
+    sets = forms.IntegerField(initial=0)
+    weight = forms.FloatField(initial=0.0)
+
     class Meta:
         model = ExerciseProgress
-        fields = ['exercise', 'repetitions', 'sets', 'weight']  
+        fields = ['exercise', 'repetitions', 'sets', 'weight']    
 
 class WorkoutForm(forms.ModelForm):
     exercises = forms.ModelMultipleChoiceField(

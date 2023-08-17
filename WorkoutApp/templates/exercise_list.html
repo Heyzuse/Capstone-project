@@ -5,8 +5,9 @@
 <ul>
     {% for exercise in exercises %}
         <li>
-            <h3>{{ exercise.name }}</h3>
+            <h3>{{ exercise.name }} <small>({{ exercise.type }})</small></h3>
             <p>{{ exercise.description }}</p>
+            <a href="{% url 'update_exercise' exercise.pk %}">Update</a> | 
             <a href="{% url 'delete_exercise' exercise.pk %}">Delete</a>
         </li>
     {% empty %}

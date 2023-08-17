@@ -24,7 +24,6 @@ urlpatterns = [
     path('browse_workouts/', PublicWorkoutListView.as_view(), name='browse_workouts'),
     path('workout/edit/<int:pk>/', views.EditWorkoutView.as_view(), name='edit_workout'),
     path('workout/<int:pk>/complete/', views.complete_workout, name='complete_workout'),
-    path('workout/<int:pk>/summary/', views.workout_summary, name='workout_summary'),
 
     # Individual Exercises
     path('profile/<int:profile_id>/exercises/', views.exercise_list, name='exercise_list'),
