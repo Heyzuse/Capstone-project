@@ -28,10 +28,14 @@ class ExerciseType(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
 
+    def __str__(self):
+        return self.name
+
 class Exercise(models.Model):
     name = models.CharField(max_length=100)
-    type = models.ForeignKey(ExerciseType, on_delete=models.CASCADE) 
+    type = models.ForeignKey(ExerciseType, on_delete=models.CASCADE)
     description = models.TextField()
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     
     def __str__(self):
         return self.name

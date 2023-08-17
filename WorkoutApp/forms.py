@@ -2,11 +2,23 @@ from django import forms
 from .models import Profile, Exercise, ExerciseType, Workout, ExerciseProgress
 
 class ProfileForm(forms.ModelForm):
-    class Meta:
-        model = Profile
-        fields = ['age', 'gender', 'height', 'weight', 'birthdate', 'fitness_goal']
+    email = forms.EmailField(label='Email:')
+    
+    height = forms.CharField(
+        label='Height (e.g., 5\'4")',
+        max_length=5,
+        widget=forms.TextInput(attrs={'placeholder': "5'4"})
+    )
+    
+    weight = forms.FloatField(
+        label='Weight (in pounds)',
+        widget=forms.NumberInput(attrs={'placeholder': "150"})
+    )
 
-class UserUpdateForm(forms.ModelForm):
+    birthdate = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'})
+    )
+
     class Meta:
         model = Profile
         fields = ['first_name', 'last_name', 'age', 'email', 'gender', 'height', 'weight', 'birthdate', 'fitness_goal']
@@ -17,19 +29,30 @@ class UserUpdateForm(forms.ModelForm):
             raise forms.ValidationError('Email address must be unique.')
         return email
 
+    def clean_height(self):
+        height_str = self.cleaned_data.get('height')
+        
+        try:
+            if '"' in height_str:
+                feet, inches = height_str.split("'")
+                inches = inches.strip().replace('"', '')
+            else:
+                feet, inches = height_str.split("'")
+            
+            total_inches = int(feet) * 12 + int(inches)
+        except ValueError:
+            raise forms.ValidationError('Invalid height format. Please use format like 5\'4" or 5\'4.')
+
+        return total_inches
+
 class ExerciseForm(forms.ModelForm):
-    TYPE_CHOICES = [
-        ('Upper Body', 'Upper Body'),
-        ('Core', 'Core'),
-        ('Lower Body', 'Lower Body'),
-        ('Full Body', 'Full Body'),
-    ]
-
-    type = forms.ChoiceField(choices=TYPE_CHOICES)
-
     class Meta:
         model = Exercise
         fields = ['name', 'type', 'description']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['type'].queryset = ExerciseType.objects.filter(name__in=['Upper Body', 'Core', 'Lower Body', 'Full Body'])
 
 class ExerciseProgressForm(forms.ModelForm):
     class Meta:
@@ -44,7 +67,7 @@ class WorkoutForm(forms.ModelForm):
 
     class Meta:
         model = Workout
-        fields = ['name', 'duration', 'exercises', 'profile']
+        fields = ['name', 'duration', 'profile']
 
     def __init__(self, *args, **kwargs):
         profile = kwargs.pop('profile', None)

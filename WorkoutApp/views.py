@@ -9,8 +9,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from .models import Profile, Exercise, ExerciseType, Workout, ExerciseProgress
-from .forms import ProfileForm, ExerciseForm, WorkoutForm, ExerciseProgressForm, UserUpdateForm
-
+from .forms import ProfileForm, ExerciseForm, WorkoutForm, ExerciseProgressForm
 
 class UserRegisterView(CreateView):
     model = User
@@ -24,7 +23,6 @@ class UserRegisterView(CreateView):
         user = authenticate(self.request, username=username, password=raw_password)
         if user is not None:
             login(self.request, user)
-            Profile.objects.get_or_create(user=user)  # Get or Create an associated Profile
             messages.success(self.request, 'Registration successful')
         else:
             messages.error(self.request, 'Registration unsuccessful. Please try again.')
@@ -53,12 +51,12 @@ class UserDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['profile'] = Profile.objects.get(user=self.object)  # get the Profile of the User
+        context['profile'] = self.object.profile
         return context
 
 class UserUpdateView(UpdateView):
     model = User
-    form_class = UserUpdateForm  # You'd create a custom form for updating
+    form_class = ProfileForm
     template_name = 'registration/profile_update.html'
     success_url = reverse_lazy('profile')
 
@@ -181,7 +179,7 @@ def add_exercises_to_workout(request, workout_id):
         form = exercise_list()
     return render(request, 'add_exercises_to_workout.html', {'form': form, 'workout': workout})
 
-def exercise_list(request):
+def exercise_list(request, profile_id):
     exercises = Exercise.objects.all()
     return render(request, 'exercise_list.html', {'exercises': exercises})
 
@@ -190,11 +188,13 @@ def exercise_detail(request, exercise_id):
     progress = ExerciseProgress.objects.filter(exercise=exercise)
     return render(request, 'exercise_detail.html', {'exercise': exercise, 'progress': progress})
 
-def exercise_create(request):
+def exercise_create(request, profile_id):
     if request.method == 'POST':
         form = ExerciseForm(request.POST)
         if form.is_valid():
-            new_exercise = form.save()
+            new_exercise = form.save(commit=False)
+            new_exercise.profile = Profile.objects.get(pk=profile_id)
+            new_exercise.save() 
             return HttpResponseRedirect(reverse('exercise_list', args=(request.user.profile.id,)))
     else:
         form = ExerciseForm()
