@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from django.dispatch import receiver
+import datetime
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -46,7 +47,6 @@ class Workout(models.Model):
     exercises = models.ManyToManyField(Exercise)
     duration = models.IntegerField(help_text="Duration in minutes")
     description = models.TextField(blank=True, null=True)
-    public = models.BooleanField(default=False, verbose_name='Publicly Accessible')
     completed = models.BooleanField(default=False)
 
 class ExerciseProgress(models.Model):
@@ -56,7 +56,36 @@ class ExerciseProgress(models.Model):
     date = models.DateField(auto_now_add=True)
     repetitions = models.IntegerField(default=0)
     sets = models.IntegerField(default=0)
-    weight = models.DecimalField(null=True, max_digits=5, decimal_places=2, help_text="Weight in kilograms or pounds.") 
+    weight = models.DecimalField(null=True, max_digits=5, decimal_places=2, help_text="Weight in kilograms or pounds.")
+
+class WorkoutProgress(models.Model):
+    workout = models.ForeignKey(Workout, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateField(default=datetime.date.today)
+    notes = models.TextField(blank=True)
+    completed = models.BooleanField(default=False) 
+
+class DailyTracking(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    date = models.DateField(auto_now_add=True)
+    activity = models.CharField(max_length=200, help_text="E.g., walking, running, yoga, etc.")
+    duration = models.IntegerField(help_text="Duration in minutes")
+    notes = models.TextField(blank=True)
+
+class Achievement(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    title = models.CharField(max_length=150)
+    description = models.TextField(blank=True)
+    date_achieved = models.DateField(auto_now_add=True)
+
+class NutritionTracking(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    date = models.DateField(auto_now_add=True)
+    food_item = models.CharField(max_length=200)
+    quantity = models.DecimalField(max_digits=5, decimal_places=2, help_text="E.g., grams, ounces, cups, etc.")
+    calories = models.IntegerField(help_text="Calories contained in the food item.")
+    notes = models.TextField(blank=True)
+
 
 @receiver(post_save, sender=User)
 def create_profile(sender, instance, created, **kwargs):

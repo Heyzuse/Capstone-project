@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
@@ -7,7 +8,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from .models import Profile, Exercise, ExerciseType, Workout, ExerciseProgress, ProfileHistory
-from .forms import ProfileForm, ExerciseForm, WorkoutForm, ExerciseProgressForm
+from .forms import ProfileForm, ExerciseForm, WorkoutForm, ExerciseProgressForm, ExerciseSelectionForm, WorkoutProgressForm
 
 class UserRegisterView(CreateView):
     model = User
@@ -81,13 +82,21 @@ class WorkoutDetailView(DetailView):
     model = Workout
     template_name = 'workout_detail.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        workout = get_object_or_404(Workout, pk=self.kwargs['pk'])
+        
+        # Fetching exercise progress for this workout and user
+        exercise_progresses = ExerciseProgress.objects.filter(workout=workout, profile=self.request.user.profile)
+        
+        context['exercise_progresses'] = exercise_progresses
+        return context
 
 class WorkoutUpdateView(UpdateView):
     model = Workout
     form_class = WorkoutForm
     template_name = 'workout_update.html'
     success_url = reverse_lazy('home')
-
 
 class WorkoutDeleteView(DeleteView):
     model = Workout
@@ -111,7 +120,6 @@ class EditWorkoutView(UpdateView):
 
     def get_form_kwargs(self):
         kwargs = super(EditWorkoutView, self).get_form_kwargs()
-        kwargs['profile'] = self.object.profile
         return kwargs
     
     def get_success_url(self):
@@ -143,7 +151,6 @@ def home(request):
 
 def profile(request, profile_id):
     profile = get_object_or_404(Profile, pk=profile_id)
-    print(profile.id)
     if request.method == 'POST':
         form = ProfileForm(request.POST, instance=profile)
         if form.is_valid():
@@ -170,18 +177,14 @@ def login_view(request):
 def add_exercises_to_workout(request, workout_id):
     workout = get_object_or_404(Workout, pk=workout_id)
     if request.method == 'POST':
-        form = ExerciseForm(request.POST)
+        form = ExerciseSelectionForm(request.POST)
         if form.is_valid():
             exercises = form.cleaned_data['exercises']
-            exercise_progress_list = []
-            for exercise in exercises:
-                progress = ExerciseProgress.objects.create(exercise=exercise, profile=request.user.profile, repetitions=0, sets=0)
-                exercise_progress_list.append(progress)
-            workout.exercises.add(*exercise_progress_list)
+            workout.exercises.add(*exercises)
             return HttpResponseRedirect(reverse('workout_detail', args=(workout.id,)))
     else:
-        form = ExerciseForm()
-    return render(request, 'add_exercises_to_workout.html', {'form': form, 'workout': workout})
+        form = ExerciseSelectionForm()
+    return render(request, 'add_exercises_to_workout.html', {'form': form, 'workout': workout, 'some_profile_id': request.user.profile.id, 'current_workout_id': workout_id})
 
 def exercise_list(request, profile_id):
     exercises = Exercise.objects.all()
@@ -192,14 +195,18 @@ def exercise_detail(request, exercise_id):
     progress = ExerciseProgress.objects.filter(exercise=exercise)
     return render(request, 'exercise_detail.html', {'exercise': exercise, 'progress': progress})
 
-def exercise_create(request, profile_id):
+def exercise_create(request, profile_id, workout_id=None):
     if request.method == 'POST':
         form = ExerciseForm(request.POST)
         if form.is_valid():
             new_exercise = form.save(commit=False)
             new_exercise.profile = Profile.objects.get(pk=profile_id)
-            new_exercise.save() 
-            return HttpResponseRedirect(reverse('exercise_list', args=(request.user.profile.id,)))
+            new_exercise.save()
+
+            if workout_id:
+                return HttpResponseRedirect(reverse('add_exercises_to_workout', args=[workout_id]))
+            else:
+                return HttpResponseRedirect(reverse('exercise_list', args=(request.user.profile.id,))) 
     else:
         form = ExerciseForm()
 
@@ -216,29 +223,35 @@ def exercise_update(request, exercise_id):
         form = ExerciseForm(instance=exercise)
     return render(request, 'exercise_update.html', {'form': form})
 
+@login_required
 def exercise_progress_create(request, workout_id, exercise_id):
     workout = get_object_or_404(Workout, pk=workout_id)
-    exercise = get_object_or_404(Exercise, pk=exercise_id)
+    exercises_in_workout = workout.exercises.all()
+
+    current_exercise = get_object_or_404(Exercise, pk=exercise_id)
 
     if request.method == 'POST':
-        form = ExerciseProgressForm(request.POST)
+        form = ExerciseProgressForm(request.POST, exercises=exercises_in_workout)
+        
         if form.is_valid():
             new_progress = form.save(commit=False)
-            new_progress.exercise = exercise
+            new_progress.workout = workout
+            new_progress.exercise = current_exercise
+            new_progress.profile = request.user.profile  # Set the profile for the ExerciseProgress instance
             new_progress.save()
 
-            exercises_in_workout = list(workout.exercises.all())
-            current_exercise_index = exercises_in_workout.index(exercise)
+            exercises_in_workout_list = list(exercises_in_workout)
+            current_exercise_index = exercises_in_workout_list.index(current_exercise)
 
             try:
-                next_exercise = exercises_in_workout[current_exercise_index + 1]
+                next_exercise = exercises_in_workout_list[current_exercise_index + 1]
                 return redirect('exercise_progress_create', workout_id=workout.id, exercise_id=next_exercise.id)
             except IndexError:
                 return redirect('workout_summary', workout.id)
     else:
-        form = ExerciseProgressForm()
+        form = ExerciseProgressForm(exercises=exercises_in_workout)
 
-    return render(request, 'exercise_progress_create.html', {'form': form, 'exercise': exercise})
+    return render(request, 'exercise_progress_create.html', {'form': form, 'exercise': current_exercise, 'workout': workout})
 
 def complete_workout(request, pk):
     workout = get_object_or_404(Workout, pk=pk)
@@ -253,6 +266,21 @@ def complete_workout(request, pk):
     return redirect('workout_summary')
 
 from django.shortcuts import render
+
+def track_workout_progress(request, workout_id):
+    workout = get_object_or_404(Workout, pk=workout_id)
+    if request.method == "POST":
+        form = WorkoutProgressForm(request.POST)
+        if form.is_valid():
+            progress = form.save(commit=False)
+            progress.workout = workout
+            progress.user = request.user
+            progress.save()
+            return HttpResponseRedirect(reverse('workout_detail', args=(workout.id,)))
+    else:
+        form = WorkoutProgressForm()
+    return render(request, 'track_workout_progress.html', {'form': form, 'workout': workout})
+
 
 def workout_summary(request, pk):
     workout = get_object_or_404(Workout, pk=pk)

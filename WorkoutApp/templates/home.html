@@ -5,13 +5,14 @@
 <p>This is your dashboard.</p>
 
 <ul class="navigation-links">
-    <li><a href="{% url 'profile' user.id %}">Profile</a></li>
-    
-    {% if user.profile %}
-    <li><a href="{% url 'exercise_create' user.profile.id %}">Create Exercise</a></li>
-    {% endif %}
-    
+    <li><a href="{% url 'profile' user.id %}">Profile</a></li>    
     <li><a href="{% url 'workout_create' %}">Create Workout</a></li>
+    {% if workout %}
+        <li><a href=" {% url 'track_workout_progress' workout.id %} ">Track Progress</a></li>
+    {% else %}
+        <li>No workouts available to track</li>
+    {% endif %}
+
     <li><a href="{% url 'logout' %}">Logout</a></li>
 </ul>
 

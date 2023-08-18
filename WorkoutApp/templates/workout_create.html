@@ -1,10 +1,14 @@
 {% extends 'base_generic.html' %}
 
 {% block content %}
-<h2>Create New Workout</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Create</button>
-</form>
+<div class="workout-form-container">
+    <h2>Create New Workout</h2>
+    <form method="post" class="workout-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="submit-button-container">
+            <button type="submit" class="submit-button">Create Workout</button>
+        </div>
+    </form>
+</div>
 {% endblock %}

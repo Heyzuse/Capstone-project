@@ -1,5 +1,5 @@
 from django import forms
-from .models import Profile, Exercise, ExerciseType, Workout, ExerciseProgress
+from .models import Profile, Exercise, ExerciseType, Workout, ExerciseProgress, WorkoutProgress
 
 class ProfileForm(forms.ModelForm):
     email = forms.EmailField(label='Email:')
@@ -57,24 +57,27 @@ class ExerciseProgressForm(forms.ModelForm):
 
     class Meta:
         model = ExerciseProgress
-        fields = ['exercise', 'repetitions', 'sets', 'weight']    
+        fields = ['exercise', 'repetitions', 'sets', 'weight']
+
+    def __init__(self, *args, **kwargs):
+        exercises = kwargs.pop('exercises', None)
+        super(ExerciseProgressForm, self).__init__(*args, **kwargs)
+
+        # Set the exercise choices based on what is passed in
+        if exercises:
+            self.fields['exercise'].queryset = exercises
+
+class WorkoutProgressForm(forms.ModelForm):
+    class Meta:
+        model = WorkoutProgress
+        fields = ['date', 'notes', 'completed']
 
 class WorkoutForm(forms.ModelForm):
-    exercises = forms.ModelMultipleChoiceField(
-        queryset=Exercise.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-    )
 
     class Meta:
         model = Workout
         fields = ['name', 'duration', 'profile']
 
-    def __init__(self, *args, **kwargs):
-        profile = kwargs.pop('profile', None)
-        super(WorkoutForm, self).__init__(*args, **kwargs)
-        if profile:
-            self.fields['exercises'].queryset = Exercise.objects.filter(profile=profile)
-            
     def clean_duration(self):
         duration = self.cleaned_data.get('duration')
         if not duration:

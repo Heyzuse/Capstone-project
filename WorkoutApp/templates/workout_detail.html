@@ -1,4 +1,5 @@
 {% extends 'base_generic.html' %}
+{% load custom_tags %}
 
 {% block content %}
 <h2>Workout Details</h2>
@@ -13,7 +14,18 @@
 <p>Exercises:</p>
 <ul>
     {% for exercise in workout.exercises.all %}
-        <li>{{ exercise.name }}: {{ exercise.repetitions }} reps, {{ exercise.sets }} sets</li>
+        <li>
+            {{ exercise.name }}:
+            {% if exercise_progresses %}
+                {% with progress=exercise_progresses|get_progress:exercise %}
+                    {{ progress.repetitions }} reps,
+                    {{ progress.sets }} sets,
+                    {{ progress.weight|default_if_none:"" }} lb
+                {% endwith %}
+            {% else %}
+                No recorded progress.
+            {% endif %}
+        </li>
     {% empty %}
         <li>No exercises added to this workout.</li>
     {% endfor %}

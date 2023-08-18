@@ -6,6 +6,13 @@
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
+    <div class="exercise-link-container">
+        {% if user.profile %}
+            <a href="{% url 'exercise_create_from_workout' profile_id=some_profile_id workout_id=current_workout_id %}">Create Exercise</a>
+                Don't see your exercise? Create a new one.
+            </a>
+        {% endif %}
+    </div>
     <button type="submit">Add</button>
 </form>
 {% endblock %}
