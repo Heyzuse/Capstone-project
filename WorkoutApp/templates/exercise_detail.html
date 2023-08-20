@@ -6,6 +6,7 @@
     <h2>{{ exercise.name }}</h2>
     <p>{{ exercise.description }}</p>
     <p>{{ exercise.date }}</p>
+    <a href="{% url 'workout_detail' workout.id %}">Back to Workout Detail</a>
     <a href="{% url 'edit_exercise' exercise.id %}">Edit</a>
     <a href="{% url 'delete_exercise' exercise.id %}">Delete</a>
 {% endblock %}

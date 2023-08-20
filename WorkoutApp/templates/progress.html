@@ -1,0 +1,23 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<canvas id="myChart"></canvas>
+<script>
+    const workoutData = {{ data|safe }};
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'line', 
+        data: {
+            labels: Object.keys(workoutData),  // Dates
+            datasets: [{
+                label: 'Exercises Performed',
+                data: Object.values(workoutData),  // Counts
+                borderColor: 'rgba(75, 192, 192, 1)',  // Color
+                fill: false  // No fill under the line
+            }]
+        }
+    });
+</script>
+{% endblock %}

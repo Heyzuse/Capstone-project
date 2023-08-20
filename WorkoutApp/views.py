@@ -111,7 +111,8 @@ class WorkoutListView(ListView):
     template_name = 'workout_list.html'
 
     def get_queryset(self):
-        return Workout.objects.filter(profile=self.request.user.profile)
+        # Return only the workouts that belong to the user's profile and haven't been completed yet
+        return Workout.objects.filter(profile=self.request.user.profile, completed=False)
 
 class EditWorkoutView(UpdateView):
     model = Workout
@@ -126,7 +127,6 @@ class EditWorkoutView(UpdateView):
         profile_id = self.object.profile.id
         return reverse('workout_list', args=[profile_id])
 
-    
 class DeleteExerciseView(DeleteView):
     model = Exercise
     template_name = 'exercise_confirm_delete.html'
@@ -190,10 +190,11 @@ def exercise_list(request, profile_id):
     exercises = Exercise.objects.all()
     return render(request, 'exercise_list.html', {'exercises': exercises})
 
-def exercise_detail(request, exercise_id):
+def exercise_detail(request, exercise_id, workout_id):
     exercise = get_object_or_404(Exercise, pk=exercise_id)
+    workout = get_object_or_404(Workout, pk=workout_id)  # Fetch the workout
     progress = ExerciseProgress.objects.filter(exercise=exercise)
-    return render(request, 'exercise_detail.html', {'exercise': exercise, 'progress': progress})
+    return render(request, 'exercise_detail.html', {'exercise': exercise, 'progress': progress, 'workout': workout})
 
 def exercise_create(request, profile_id, workout_id=None):
     if request.method == 'POST':
@@ -226,30 +227,37 @@ def exercise_update(request, exercise_id):
 @login_required
 def exercise_progress_create(request, workout_id, exercise_id):
     workout = get_object_or_404(Workout, pk=workout_id)
-    exercises_in_workout = workout.exercises.all()
-
     current_exercise = get_object_or_404(Exercise, pk=exercise_id)
 
     if request.method == 'POST':
-        form = ExerciseProgressForm(request.POST, exercises=exercises_in_workout)
-        
+        form = ExerciseProgressForm(request.POST)
+
         if form.is_valid():
             new_progress = form.save(commit=False)
             new_progress.workout = workout
             new_progress.exercise = current_exercise
-            new_progress.profile = request.user.profile  # Set the profile for the ExerciseProgress instance
+            new_progress.profile = request.user.profile
             new_progress.save()
 
-            exercises_in_workout_list = list(exercises_in_workout)
-            current_exercise_index = exercises_in_workout_list.index(current_exercise)
-
+            # Get the IDs of exercises in the workout
+            exercise_ids = list(workout.exercises.values_list('id', flat=True))
             try:
-                next_exercise = exercises_in_workout_list[current_exercise_index + 1]
-                return redirect('exercise_progress_create', workout_id=workout.id, exercise_id=next_exercise.id)
+                # Find the index of current exercise
+                current_index = exercise_ids.index(current_exercise.id)
+                # Try to get the next exercise by ID
+                next_exercise_id = exercise_ids[current_index + 1]
+                return redirect('exercise_progress_create', workout_id=workout.id, exercise_id=next_exercise_id)
             except IndexError:
+                # If current exercise is the last one
+                workout.completed = True  # Mark the workout as completed
+                workout.save()            # Save the workout instance
                 return redirect('workout_summary', workout.id)
+
+        else:
+            print("Form errors:", form.errors)
+
     else:
-        form = ExerciseProgressForm(exercises=exercises_in_workout)
+        form = ExerciseProgressForm()
 
     return render(request, 'exercise_progress_create.html', {'form': form, 'exercise': current_exercise, 'workout': workout})
 
@@ -281,15 +289,32 @@ def track_workout_progress(request, workout_id):
         form = WorkoutProgressForm()
     return render(request, 'track_workout_progress.html', {'form': form, 'workout': workout})
 
-
 def workout_summary(request, pk):
     workout = get_object_or_404(Workout, pk=pk)
 
     if request.user.profile != workout.profile:
         messages.error(request, "You don't have permission to view this workout.")
         return redirect('home')  # Redirect to a fallback view or page
+    
+    exercises_progress = workout.exerciseprogress_set.all()  # Fetching all ExerciseProgress records related to the workout
 
     context = {
-        'workout': workout
+        'workout': workout,
+        'exercises_progress': exercises_progress
     }
-    return render(request, 'WorkoutApp/workout_summary.html', context)
+    return render(request, 'workout_summary.html', context)
+
+def get_workout_data(request):
+    # Fetch the data from the ExerciseProgress model.
+    workout_data = ExerciseProgress.objects.filter(user=request.user)
+
+    # Aggregate the data. For simplicity, we are aggregating the count of exercises per day.
+    aggregated_data = {}
+    for entry in workout_data:
+        date = entry.date.strftime('%Y-%m-%d')  # Format the date as a string.
+        if date in aggregated_data:
+            aggregated_data[date] += 1
+        else:
+            aggregated_data[date] = 1
+
+    return render(request, 'progress.html', {'data': aggregated_data})

@@ -8,9 +8,13 @@
     <p><strong>Description:</strong> {{ workout.description }}</p>
     <p><strong>Exercises:</strong></p>
     <ul>
-        {% for exercise in workout.exercises.all %}
-            <li>{{ exercise.name }} (Reps: {{ exercise.reps }}, Sets: {{ exercise.sets }})</li>
+        {% for exercise_prog in exercises_progress %}
+            <li>
+                {{ exercise_prog.exercise.name }} (Reps: {{ exercise_prog.repetitions }}, Sets: {{ exercise_prog.sets }})
+            </li>
         {% endfor %}
     </ul>
-    <p><strong>Completed:</strong> {{ workout.completed }}</p>
+    {% if workout.completed %}
+        <p><strong>Good job! You've completed this workout!</strong></p>
+    {% endif %}
 {% endblock %}

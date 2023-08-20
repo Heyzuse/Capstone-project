@@ -57,15 +57,7 @@ class ExerciseProgressForm(forms.ModelForm):
 
     class Meta:
         model = ExerciseProgress
-        fields = ['exercise', 'repetitions', 'sets', 'weight']
-
-    def __init__(self, *args, **kwargs):
-        exercises = kwargs.pop('exercises', None)
-        super(ExerciseProgressForm, self).__init__(*args, **kwargs)
-
-        # Set the exercise choices based on what is passed in
-        if exercises:
-            self.fields['exercise'].queryset = exercises
+        fields = ['repetitions', 'sets', 'weight']
 
 class WorkoutProgressForm(forms.ModelForm):
     class Meta:
@@ -76,7 +68,7 @@ class WorkoutForm(forms.ModelForm):
 
     class Meta:
         model = Workout
-        fields = ['name', 'duration', 'profile']
+        fields = ['name', 'duration']
 
     def clean_duration(self):
         duration = self.cleaned_data.get('duration')

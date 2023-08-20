@@ -29,7 +29,7 @@ urlpatterns = [
 
     # Individual Exercises
     path('profile/<int:profile_id>/exercises/', views.exercise_list, name='exercise_list'),
-    path('exercise/<int:exercise_id>/', views.exercise_detail, name='exercise_detail'),
+    path('exercise/<int:exercise_id>/from-workout/<int:workout_id>/', views.exercise_detail, name='exercise_detail'),
     path('exercise/create/<int:profile_id>/<int:workout_id>/', views.exercise_create, name='exercise_create_from_workout'),
     path('exercise/create/<int:profile_id>/', views.exercise_create, name='exercise_create'),
     path('exercise/<int:exercise_id>/edit/', views.exercise_update, name='exercise_update'),

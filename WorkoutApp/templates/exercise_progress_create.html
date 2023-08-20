@@ -2,6 +2,7 @@
 
 {% block content %}
   <h2>Log Progress for {{ workout.name }}</h2>
+  <h3>Exercise: {{ exercise.name }}</h3>
 
   <form method="post">
     {% csrf_token %}

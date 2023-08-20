@@ -2,6 +2,13 @@
 {% load custom_tags %}
 
 {% block content %}
+<style>
+    .exercise-name-on-detail {
+        font-weight: bold;
+        text-decoration: underline;
+    }
+</style>
+
 <h2>Workout Details</h2>
 <p>Name: {{ workout.name }}</p>
 <p>Date: {{ workout.date }}</p>
@@ -15,7 +22,8 @@
 <ul>
     {% for exercise in workout.exercises.all %}
         <li>
-            {{ exercise.name }}:
+            <span class="exercise-name-on-detail">{{ exercise.name }}</span><br>
+            Description: {{ exercise.description }}<br>
             {% if exercise_progresses %}
                 {% with progress=exercise_progresses|get_progress:exercise %}
                     {{ progress.repetitions }} reps,
@@ -31,12 +39,12 @@
     {% endfor %}
 </ul>
 
+<a href="{% url 'add_exercises_to_workout' workout.id %}">Add Exercises</a>
 {% if workout.exercises.all %}
-    <a href="{% url 'exercise_progress_create' workout.id workout.exercises.first.id %}" class="btn btn-primary">Workout Complete</a>
+    <a href="{% url 'exercise_progress_create' workout.id workout.exercises.first.id %}" class="btn btn-primary">Record and Complete Workout</a>
 {% else %}
     <span class="btn btn-primary disabled">No Exercises to Complete</span>
 {% endif %}
 <a href="{% url 'workout_update' workout.id %}">Update Workout</a>
-<a href="{% url 'add_exercises_to_workout' workout.id %}">Add Exercises</a>
 <a href="{% url 'workout_delete' workout.id %}">Delete Workout</a>
 {% endblock %}
