@@ -1,22 +1,49 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    font-family: 'Open Sans', sans-serif; /* Using Open Sans for instance */
+    background: linear-gradient(to bottom, #f2f2f2 0%, #e6e6e6 100%); /* Light gradient */
+    font-size: 20px;
+    color: #333;
+    line-height: 1.5; /* Improved readability */
 }
 
 header, footer {
     background-color: #333;
-    color: rgb(218, 217, 217);
-    padding: 10px;
+    color: #dadad9;
+    padding: 20px;
 }
 
 nav a {
     color: rgb(19, 6, 194);
     text-decoration: none;
-    margin: 0 10px;
+    margin: 0 15px;
+    transition: color 0.3s ease; /* Smooth transition */
+}
+
+nav a:hover {
+    color: rgb(10, 4, 130); /* Darker shade on hover */
 }
 
 main {
-    padding: 20px;
+    padding: 40px; /* More padding */
 }
 
-/* other styles */
+button, .btn {
+    background: linear-gradient(to top, #5a67d8, #667eea);
+    border: none;
+    padding: 10px 20px;
+    color: #fff;
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08); /* subtle shadow */
+    transition: background 0.3s ease, transform 0.3s ease; /* Smooth transition */
+}
+
+button:hover, .btn:hover {
+    background: linear-gradient(to top, #4a56c8, #566dea);
+    transform: translateY(-2px); 
+}
+
+button:active, .btn:active {
+    transform: translateY(1px); 
+}
+
+/* Add other specific stylings below */
