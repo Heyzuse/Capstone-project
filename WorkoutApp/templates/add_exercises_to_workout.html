@@ -14,5 +14,6 @@
         {% endif %}
     </div>
     <button type="submit">Add</button>
+    <a href="{% url 'workout_detail' workout.id %}">Back to Workout Details</a>
 </form>
 {% endblock %}
